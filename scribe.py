@@ -1,6 +1,7 @@
 import os
 import time
 from termcolor import colored
+import math
 
 # This is the Canvas class. It defines some height and width, and a 
 # matrix of characters to keep track of where the TerminalScribes are moving
@@ -14,11 +15,11 @@ class Canvas:
 
     # Returns True if the given point is outside the boundaries of the Canvas
     def hitsWall(self, point):
-        return point[0] < 0 or point[0] >= self._x or point[1] < 0 or point[1] >= self._y
+        return round(point[0]) < 0 or round(point[0]) >= self._x or round(point[1]) < 0 or round(point[1]) >= self._y
 
     # Set the given position to the provided character on the canvas
     def setPos(self, pos, mark):
-        self._canvas[pos[0]][pos[1]] = mark
+        self._canvas[round(pos[0])][round(pos[1])] = mark
 
     # Clear the terminal (used to create animation)
     def clear(self):
@@ -35,26 +36,36 @@ class TerminalScribe:
         self.canvas = canvas
         self.trail = '.'
         self.mark = '*'
-        self.framerate = 0.2
-        self.pos = [0, 0]
+        self.framerate = 0.05
+        self.pos = [0,0]
+        #Direction (vector when x=0 and y=1 the angle is 0)  
+        self.direction = [0, 1] 
+
+    def setDegrees(self, angle):
+        radians= (angle/180) * math.pi
+        #calculate x and y position (hypotenusa = 1)
+        self.direction = [math.sin(radians), - math.cos(radians)]
+     
 
     def up(self):
-        pos = [self.pos[0], self.pos[1]-1]
-        if not self.canvas.hitsWall(pos):
-            self.draw(pos)
+        self.direction = [0,-1]
+        self.forward()
+        
 
     def down(self):
-        pos = [self.pos[0], self.pos[1]+1]
-        if not self.canvas.hitsWall(pos):
-            self.draw(pos)
+        self.direction = [0,1]
+        self.forward()
 
     def right(self):
-        pos = [self.pos[0]+1, self.pos[1]]
-        if not self.canvas.hitsWall(pos):
-            self.draw(pos)
+        self.direction = [1,0]
+        self.forward()
 
     def left(self):
-        pos = [self.pos[0]-1, self.pos[1]]
+        self.direction = [-1,0]
+        self.forward()
+    
+    def forward(self):
+        pos= [self.pos[0] + self.direction[0], self.pos[1]+self.direction[1]]
         if not self.canvas.hitsWall(pos):
             self.draw(pos)
 
@@ -70,38 +81,34 @@ class TerminalScribe:
         # Sleep for a little bit to create the animation
         time.sleep(self.framerate)
 
+    # For direction we use radians = (angle / 180) * Pi 
+    
+    def draw_square(self,side):
+        for i in range(side):
+            self.right() 
+        for i in range(side):
+            self.down()
+        for i in range(side):
+            self.left()
+        for i in range(side):
+            self.up()
+        
+
+
 # Create a new Canvas instance that is 30 units wide by 30 units tall 
 canvas = Canvas(30, 30)
 
 # # Create a new scribe and give it the Canvas object
 scribe = TerminalScribe(canvas)
-
-# # Draw a small square
-# scribe.right()
-# scribe.right()
-# scribe.right()
-# scribe.down()
-# scribe.down()
-# scribe.down()
-# scribe.left()
-# scribe.left()
-# scribe.left()
-# scribe.up()
-# scribe.up()
-# scribe.up()
+scribe.setDegrees (135)
+for i in range (30):
+    scribe.forward()
 
 
-def draw_square(side):
-    
-    for i in range(0,side):
-        scribe.right() 
-    for i in range(0,side):
-        scribe.down()
-    for i in range(side,0,-1):
-        scribe.left()
-    for i in range(side,0,-1):
-        scribe.up()
+#This is a function to draw a square
+# requires an int for side 
+
     
     
 
-draw_square(20)
+#draw_square(7)
