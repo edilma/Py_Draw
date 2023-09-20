@@ -40,6 +40,9 @@ class TerminalScribe:
         self.pos = [0,0]
         #Direction (vector when x=0 and y=1 the angle is 0)  
         self.direction = [0, 1] 
+    
+    def setPosition(self, pos):
+        self.pos = pos
 
     def setDegrees(self, angle):
         radians= (angle/180) * math.pi
@@ -81,8 +84,7 @@ class TerminalScribe:
         # Sleep for a little bit to create the animation
         time.sleep(self.framerate)
 
-    # For direction we use radians = (angle / 180) * Pi 
-    
+        
     def draw_square(self,side):
         for i in range(side):
             self.right() 
@@ -92,23 +94,69 @@ class TerminalScribe:
             self.left()
         for i in range(side):
             self.up()
+
         
+
+
+
+def create_shape (data_scribe):
+    scribe.setDegrees (data_scribe[angle])
+    for i in range(data_scribe[size]):
+        i
+        scribe.forward()
+
+
+##################   Testing   ##################
 
 
 # Create a new Canvas instance that is 30 units wide by 30 units tall 
 canvas = Canvas(30, 30)
 
-# # Create a new scribe and give it the Canvas object
-scribe = TerminalScribe(canvas)
-scribe.setDegrees (135)
-for i in range (30):
-    scribe.forward()
 
 
-#This is a function to draw a square
-# requires an int for side 
 
-    
-    
 
-#draw_square(7)
+scribes = [
+    {'degrees': 30, 'position': [15,15], 'instructions': [
+        {'function':'forward', 'duration': 100}
+        ]},
+    {'degrees': 135, 'position': [0, 0], 'instructions': [
+        {'function':'forward', 'duration': 10},
+        {'function':'down', 'duration': 2},
+        {'function':'right', 'duration': 20},
+        {'function':'down', 'duration': 2}
+        ]},
+    {'degrees': 180, 'position': [15, 0], 'instructions': [
+        {'function':'down', 'duration': 10},
+        {'function':'left', 'duration': 10},
+        ]}]
+
+
+
+for scribeData in scribes:
+    scribeData['scribe'] = TerminalScribe(canvas)
+    scribeData['scribe'].setDegrees(scribeData['degrees'])
+    scribeData['scribe'].setPosition(scribeData['position'])
+ # Flatten instructions:
+    # Convert "{'left': 10}" to ['left', 'left', 'left'...]
+    scribeData['instructions_flat'] = []
+    for instruction in scribeData['instructions']:
+        scribeData['instructions_flat'] = scribeData['instructions_flat'] + [instruction['function']]*instruction['duration']
+
+maxInstructionLength = max([len(scribeData['instructions_flat']) for scribeData in scribes])
+
+for i in range(maxInstructionLength):
+    for scribeData in scribes:
+        if i < len(scribeData['instructions_flat']):
+            if scribeData['instructions_flat'][i] == 'forward':
+                scribeData['scribe'].forward()
+            elif scribeData['instructions_flat'][i] == 'drawSquare':
+                scribeData['scribe'].drawSquare()
+            elif scribeData['instructions_flat'][i] == 'up':
+                scribeData['scribe'].up()
+            elif scribeData['instructions_flat'][i] == 'down':
+                scribeData['scribe'].down()
+            elif scribeData['instructions_flat'][i] == 'left':
+                scribeData['scribe'].left()
+            elif scribeData['instructions_flat'][i] == 'right':
+                scribeData['scribe'].right()
